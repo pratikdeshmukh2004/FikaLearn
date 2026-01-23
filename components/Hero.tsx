@@ -5,7 +5,7 @@ import { motion, useScroll, useTransform } from 'framer-motion';
 
 const Hero: React.FC = () => {
   const { scrollY } = useScroll();
-  const yParallax = useTransform(scrollY, [0, 1000], [0, 300]);
+  const yParallax = useTransform(scrollY, [0, 2000], [0, 400]);
   
   const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.flutter_fika_learn&hl=en";
 
@@ -21,17 +21,13 @@ const Hero: React.FC = () => {
   };
 
   return (
-    <section id="hero" className="relative pt-40 pb-20 md:pt-60 md:pb-32 overflow-hidden">
+    <section id="hero" className="relative py-24 md:py-32 overflow-hidden bg-white">
       {/* Background Decor */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[1200px] bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-50/50 via-white to-white pointer-events-none -z-10" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-cyan-50/30 via-white to-white pointer-events-none -z-10" />
       
       <motion.div 
         style={{ y: yParallax }}
         className="absolute top-[10%] right-[5%] w-[500px] h-[500px] bg-[#38A4BE]/10 rounded-full blur-[120px] -z-10" 
-      />
-      <motion.div 
-        style={{ y: useTransform(scrollY, [0, 1000], [0, -100]) }}
-        className="absolute top-[30%] left-[5%] w-[400px] h-[400px] bg-purple-100/40 rounded-full blur-[100px] -z-10" 
       />
 
       <div className="max-w-7xl mx-auto px-6 flex flex-col items-center text-center">
@@ -39,7 +35,8 @@ const Hero: React.FC = () => {
         {/* Text Content */}
         <motion.div 
           initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.8, ease: "easeOut" }}
           className="max-w-4xl mx-auto z-10 mb-16"
         >
