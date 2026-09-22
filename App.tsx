@@ -20,9 +20,41 @@ import { Smartphone, X, ArrowRight } from 'lucide-react';
 
 export type ViewType = 'home' | 'privacy' | 'refund' | 'terms' | 'about' | 'feature-detail';
 
+// Map between the internal view state and browser URL paths so the address bar
+// stays in sync and the back/forward buttons work.
+const pathFromState = (view: ViewType, featureId: number | null): string => {
+  switch (view) {
+    case 'home':
+      return '/';
+    case 'feature-detail':
+      return featureId !== null ? `/feature/${featureId}` : '/';
+    default:
+      return `/${view}`;
+  }
+};
+
+const stateFromPath = (pathname: string): { view: ViewType; featureId: number | null } => {
+  const segments = pathname.replace(/^\/+|\/+$/g, '').split('/');
+  const [first, second] = segments;
+
+  if (!first) return { view: 'home', featureId: null };
+
+  if (first === 'feature') {
+    const id = Number(second);
+    return { view: 'feature-detail', featureId: Number.isNaN(id) ? null : id };
+  }
+
+  if (['privacy', 'refund', 'terms', 'about'].includes(first)) {
+    return { view: first as ViewType, featureId: null };
+  }
+
+  return { view: 'home', featureId: null };
+};
+
 function App() {
-  const [view, setView] = useState<ViewType>('home');
-  const [selectedFeatureId, setSelectedFeatureId] = useState<number | null>(null);
+  const initial = stateFromPath(window.location.pathname);
+  const [view, setView] = useState<ViewType>(initial.view);
+  const [selectedFeatureId, setSelectedFeatureId] = useState<number | null>(initial.featureId);
   const [showReturnNotification, setShowReturnNotification] = useState(false);
 
   const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.flutter_fika_learn&hl=en";
@@ -39,11 +71,28 @@ function App() {
     }
   }, [view, selectedFeatureId]);
 
+  // Keep the view state in sync with browser back/forward navigation.
+  useEffect(() => {
+    const handlePopState = () => {
+      const next = stateFromPath(window.location.pathname);
+      setView(next.view);
+      setSelectedFeatureId(next.featureId);
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const handleNavigate = (newView: ViewType, featureId?: number) => {
+    const nextFeatureId = featureId !== undefined ? featureId : selectedFeatureId;
     if (featureId !== undefined) {
       setSelectedFeatureId(featureId);
     }
     setView(newView);
+
+    const nextPath = pathFromState(newView, nextFeatureId);
+    if (window.location.pathname !== nextPath) {
+      window.history.pushState({ view: newView, featureId: nextFeatureId }, '', nextPath);
+    }
   };
 
   const handleNotificationCTA = () => {
