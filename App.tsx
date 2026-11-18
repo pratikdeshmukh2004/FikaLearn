@@ -51,6 +51,20 @@ const stateFromPath = (pathname: string): { view: ViewType; featureId: number | 
   return { view: 'home', featureId: null };
 };
 
+const PAGE_META: Record<string, { title: string; description: string; path: string }> = {
+  refund: { title: 'Cancellation & Refund Policy | FikaLearn', description: 'FikaLearn cancellation, refund and auto-renewal policy.', path: '/refund' },
+  terms: { title: 'Payment Terms & Conditions | FikaLearn', description: 'FikaLearn payment terms and conditions.', path: '/terms' },
+  about: { title: 'About Us | FikaLearn', description: 'About FikaLearn, CBSE exam preparation for Class 10 students.', path: '/about' },
+};
+
+const DEFAULT_TITLE = document.title;
+const DEFAULT_DESC = document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '';
+
+// The privacy policy is a static page (public/privacy.html), not a React view.
+if (/^\/privacy\/?$/.test(window.location.pathname)) {
+  window.location.replace('/privacy.html');
+}
+
 function App() {
   const initial = stateFromPath(window.location.pathname);
   const [view, setView] = useState<ViewType>(initial.view);
@@ -71,6 +85,15 @@ function App() {
     }
   }, [view, selectedFeatureId]);
 
+  // Per-page canonical, title and description.
+  useEffect(() => {
+    const meta = PAGE_META[view];
+    const path = meta ? meta.path : view === 'feature-detail' && selectedFeatureId !== null ? `/feature/${selectedFeatureId}` : '/';
+    document.querySelector('link[rel="canonical"]')?.setAttribute('href', 'https://fikalearn.com' + path);
+    document.title = meta ? meta.title : DEFAULT_TITLE;
+    document.querySelector('meta[name="description"]')?.setAttribute('content', meta ? meta.description : DEFAULT_DESC);
+  }, [view, selectedFeatureId]);
+
   // Keep the view state in sync with browser back/forward navigation.
   useEffect(() => {
     const handlePopState = () => {
@@ -83,6 +106,10 @@ function App() {
   }, []);
 
   const handleNavigate = (newView: ViewType, featureId?: number) => {
+    if (newView === 'privacy') {
+      window.location.assign('/privacy/');
+      return;
+    }
     const nextFeatureId = featureId !== undefined ? featureId : selectedFeatureId;
     if (featureId !== undefined) {
       setSelectedFeatureId(featureId);

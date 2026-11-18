@@ -1,0 +1,9 @@
+[
+  { "source": "/privacy", "target": "/privacy.html", "status": "200", "condition": null },
+  { "source": "/privacy/", "target": "/privacy/index.html", "status": "200", "condition": null },
+  { "source": "/about", "target": "/index.html", "status": "200", "condition": null },
+  { "source": "/terms", "target": "/index.html", "status": "200", "condition": null },
+  { "source": "/refund", "target": "/index.html", "status": "200", "condition": null },
+  { "source": "/feature/<*>", "target": "/index.html", "status": "200", "condition": null },
+  { "source": "/<*>", "target": "/404.html", "status": "404", "condition": null }
+]
